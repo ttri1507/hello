@@ -94,6 +94,8 @@ GRANT ALL ON magento2.* TO 'mageplaza'@'localhost' IDENTIFIED BY 'YOUR_PASSWORD'
 FLUSH PRIVILEGES;
 EXIT;
 
+
+(Apache)
 Step 4: Install Composer 
 - Tải Composer và cài đặt; hoặc có thể cài đặt Composer bằng lệnh:
 curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
