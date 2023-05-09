@@ -81,7 +81,7 @@ Step 3: Create MySQL User (Required)
 sudo mysql -u root -p
 
 - Tạo database mới tên magento2:
-CREATE DATABASE magento2
+CREATE DATABASE magento2;
 
 - Tạo user mới, đặt tên là mageplaza
 CREATE USER 'mageplaza'@'localhost' IDENTIFIED BY 'YOUR_PASSWORD';
