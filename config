@@ -1,0 +1,179 @@
+LAB - 01
+Install Magento 2 on Ubuntu/Debian
+ 
+Step 1: Install Apache2 PHP and Required Extensions 
+Step 1.1 Install Apache2 Server
+- Cài đặt Apache:
+sudo apt update
+sudo apt install apache2
+
+- Thiết lập cho Apache tự động chạy khi startup:
+sudo systemctl enable apache2.service
+
+Step 1.2 Configure Apache2 Virtual Host
+- Khai báo cấu hình website, bằng cách tạo file cấu hình magento2.conf
+sudo nano /etc/apache2/sites-available/magento2.conf
+
+- Copy và paste nội dung bên dưới vào file. Đổi domain.com thành domain của bạn.
+
+<VirtualHost *:80>
+     ServerAdmin admin@domain.com
+     DocumentRoot /var/www/html/magento2/
+     ServerName domain.com
+     ServerAlias www.domain.com
+
+     <Directory /var/www/html/magento2/>
+        Options Indexes FollowSymLinks MultiViews
+        AllowOverride All
+        Order allow,deny
+        allow from all
+     </Directory>
+
+     ErrorLog ${APACHE_LOG_DIR}/error.log
+     CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+- Cập nhật phân giải domain name vào file hosts. Đường dẫn file /etc/hosts:
+127.0.0.1 domain.com
+
+- Bật Rewite mod
+sudo a2ensite magento2.conf
+sudo a2enmod rewrite
+
+Step 1.3: Install PHP 7.2 and extensions
+- Cài đặt PHP 7.2 bằng lệnh sau:
+sudo apt install php7.2 libapache2-mod-php7.2 php7.2-common php7.2-gmp php7.2-curl php7.2-soap php7.2-bcmath php7.2-intl php7.2-mbstring php7.2-xmlrpc php7.2-mcrypt php7.2-mysql php7.2-gd php7.2-xml php7.2-cli php7.2-zip
+
+Step 1.4: Update php.ini file
+- Mở file php.ini :
+sudo nano /etc/php/7.2/apache2/php.ini
+- Thay đổi các hình như đây, sau đó lưu file lại:
+file_uploads = On
+allow_url_fopen = On
+short_open_tag = On
+memory_limit = 512M
+upload_max_filesize = 128M
+max_execution_time = 3600
+- Khởi động lại apache2:
+sudo systemctl restart apache2.service
+
+Step 2: Install Database Server 
+- Cài đặt MariaDB Server:
+sudo apt-get install mariadb-server mariadb-client
+
+- Thiết lập cho MariaDB tự động chạy khi startup:
+sudo systemctl restart mariadb.service
+sudo systemctl enable mariadb.service
+
+- Khai báo các thiết lập ban đầu:
+sudo mysql_secure_installation
+
+Enter current password for root (enter for none): Enter
+Set root password? [Y/n]: Y
+New password: Type your password
+Re-enter new password: Type your password
+Remove anonymous users? [Y/n]: Y
+Disallow root login remotely? [Y/n]: Y
+Remove test database and access to it? [Y/n]:  Y
+Reload privilege tables now? [Y/n]:  Y
+
+Step 3: Create MySQL User (Required)
+- Login vào MariaDB
+sudo mysql -u root -p
+
+- Tạo database mới tên magento2:
+CREATE DATABASE magento2
+
+- Tạo user mới, đặt tên là mageplaza
+CREATE USER 'mageplaza'@'localhost' IDENTIFIED BY 'YOUR_PASSWORD';
+
+- Grant mageplaza user to magento2 database:
+GRANT ALL ON magento2.* TO 'mageplaza'@'localhost' IDENTIFIED BY 'YOUR_PASSWORD' WITH GRANT OPTION;
+
+-  Flush privileges and exit
+FLUSH PRIVILEGES;
+EXIT;
+
+Step 4: Install Composer 
+- Tải Composer và cài đặt; hoặc có thể cài đặt Composer bằng lệnh:
+curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
+
+- Kiểm tra Composer đã được cài đặt chưa, bằng lệnh: 
+composer -v
+Kết quả:
+   ______
+  / ____/___  ____ ___  ____  ____  ________  _____
+ / /   / __ \/ __ `__ \/ __ \/ __ \/ ___/ _ \/ ___/
+/ /___/ /_/ / / / / / / /_/ / /_/ (__  )  __/ /
+\____/\____/_/ /_/ /_/ .___/\____/____/\___/_/
+                    /_/
+Composer version 1.8.5 2019-04-09
+
+Step 5: Download Magento 2 Pack 
+- Có thể tải và cài đặt Magent 2 qua các resources dưới dây:
+•	https://magento.com/tech-resources/download
+•	https://github.com/magento/magento2/releases
+•	https://www.mageplaza.com/download-magento/
+
+- Sau khi tải, bạn giải nén vào thư mục /var/www/html/magento2
+
+- Cấu hình permissions: Chạy các lệnh sau:
+sudo chown -R www-data:www-data /var/www/html/magento2/
+sudo chmod -R 755 /var/www/html/magento2/
+
+Step 6: Install Magento 2
+- Truy cập vào địa chỉ http://localhost.com/magento2, sẽ xuất hiện Magento Setup Wizard như hình dưới:
+ 
+Step 6.1: Start Installing
+•	Click Start Readiness Check. Nếu bất kỳ lỗi nào xuất hiện, bạn phải sửa lỗi đó trước khi tiếp tục.  
+
+Step 6.2 Add a Database
+- Điền thông tin database, sau đó click  Next
+Step 6.3 Web Configuration
+- Điền các thông tin sau:
+•	Your Store Address: http://localhost.com
+•	Magento Admin Address: Điền URL quản trị 
+- Sau đó click  Next
+Step 6.4. Customize Your Store
+Khai báo các thông tin khác.
+Step 6.5. Create Admin Account
+Điền thông tin tài khoản Admin
+•	New Username
+•	New E-Mail
+•	New Password
+•	Confirm Password
+
+Step 6.6. Install
+ 
+Sau khi thiết lập xong các thông tin, click Install Now.
+Step 6.7: Check the result
+Truy cập vào website frontend và backend để xem kết quả.
+Frontend
+ 
+Backend
+ 
+
+Step 7: Config HAPROXY
+
+- Sau khi cài đặt, sửa file cấu hình 
+sudo nano /etc/haproxy/haproxy.cfg
+
+- Cấu hình các thông tin dưới đây:
+frontend haproxy-main
+    bind *:80
+    option forwardfor  
+    default_backend apache_webservers    
+
+backend apache_webservers
+    balance roundrobin
+    server websvr1	10.0.0.10:80 check
+    server websvr2	10.0.0.20:80 check
+
+
+
+
+Document tham khảo thêm:
+- Triển khai Magento 2 trên Docker: 
+https://www.mageplaza.com/kb/setup-magento-2-on-docker.html#benefits-of-setting-up-magento-2-on-docker
+
+- Triển khau Magento 2 trên Kubernetes:
+https://kiwee.eu/blog/magento-2-on-kubernetes/
